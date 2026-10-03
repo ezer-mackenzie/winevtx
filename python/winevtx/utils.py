@@ -9,11 +9,6 @@ from winevtx._winevtx import (  # type: ignore[import-not-found]
     xml_to_json as _xml_to_json,
 )
 
-__all__ = [
-    "xml_to_dict",
-    "xml_to_json",
-]
-
 
 def xml_to_dict(xml: str) -> Dict[str, Any]:
     """Parse a raw Windows Event XML string into a native Python dictionary.
