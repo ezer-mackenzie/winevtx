@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterator, List, Union
+from typing import Any, Dict, List, Union
 
 class EventRecord:
     """Represents a Windows Event record with parsed metadata and lazy dictionary conversion."""
