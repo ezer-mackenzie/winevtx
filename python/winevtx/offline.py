@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Literal, Union, overload
 
 from ._winevtx import (
     EventRecord,
@@ -17,7 +17,7 @@ def read_evtx(
     path: str,
     limit: int | None = None,
     format: str = "record",
-) -> List[Union[EventRecord, Dict[str, Any], str]]:
+) -> List[Any]:
     """Read parsed events from an offline Windows Event Log (.evtx) file.
 
     Args:

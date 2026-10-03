@@ -61,6 +61,7 @@ class TestWinevtxLive(unittest.TestCase):
         self.assertGreaterEqual(len(events), 1)
         for ev in events:
             self.assertIsNotNone(ev.level)
+            assert ev.level is not None
             self.assertLessEqual(ev.level, 4)
 
     def test_offline_evtx(self):

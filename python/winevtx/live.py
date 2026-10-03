@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Literal, Union, overload
 
 from ._winevtx import (
     EventRecord,
@@ -19,7 +19,7 @@ def query_events(
     limit: int | None = None,
     reverse: bool = True,
     format: str = "record",
-) -> List[Union[EventRecord, Dict[str, Any], str]]:
+) -> List[Any]:
     """Query live events from a Windows Event Log channel (e.g. 'System', 'Application', 'Security').
 
     Args:

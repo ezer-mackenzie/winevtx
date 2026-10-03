@@ -1,0 +1,11 @@
+{
+  "include": ["python", "tests"],
+  "extraPaths": ["python"],
+  "executionEnvironments": [
+    {
+      "root": "python"
+    }
+  ],
+  "venvPath": ".",
+  "venv": ".venv"
+}
