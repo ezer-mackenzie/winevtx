@@ -1,0 +1,315 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and publish, for example v1.0.0"
+        required: true
+        type: string
+      publish:
+        description: "Publish to PyPI after validation (disable for a rehearsal)"
+        required: true
+        type: boolean
+        default: true
+
+# Serialize manual and release-triggered publication of the same version.
+concurrency:
+  group: release-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+      modern_release: ${{ steps.capabilities.outputs.modern_release }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Detect release tooling
+        id: capabilities
+        run: |
+          if [[ -f tools/validate_release.py && -f tools/validate_distribution.py && -d docs ]]; then
+            echo "modern_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "modern_release=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Validate modern release
+        if: steps.capabilities.outputs.modern_release == 'true'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          RELEASE_PRERELEASE: ${{ github.event_name == 'release' && toJSON(github.event.release.prerelease) || '' }}
+        run: python tools/validate_release.py
+      - name: Validate historical release version
+        if: steps.capabilities.outputs.modern_release != 'true'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+          import re
+
+          tag = os.environ["RELEASE_TAG"].removeprefix("v")
+          cargo = pathlib.Path("Cargo.toml").read_text(encoding="utf-8")
+          match = re.search(r'^version\s*=\s*"([^"]+)"', cargo, re.MULTILINE)
+          if not match or match.group(1) != tag:
+              raise SystemExit(
+                  f"RELEASE_TAG ({tag}) does not match Cargo.toml version "
+                  f"({match.group(1) if match else 'missing'})"
+              )
+          PY
+      - name: Resolve immutable build commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --locked
+      - run: uv run python -m unittest discover -s tests -v
+      - if: steps.capabilities.outputs.modern_release == 'true'
+        run: uv run --group docs mkdocs build --strict
+
+  linux:
+    needs: validate
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      matrix:
+        platform:
+          - runner: ubuntu-22.04
+            target: x86_64
+          - runner: ubuntu-22.04
+            target: x86
+          - runner: ubuntu-22.04
+            target: aarch64
+          - runner: ubuntu-22.04
+            target: armv7
+          - runner: ubuntu-22.04
+            target: s390x
+          - runner: ubuntu-22.04
+            target: ppc64le
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --find-interpreter
+          manylinux: auto
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-linux-${{ matrix.platform.target }}
+          path: dist
+
+  musllinux:
+    needs: validate
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      matrix:
+        platform:
+          - runner: ubuntu-22.04
+            target: x86_64
+          - runner: ubuntu-22.04
+            target: x86
+          - runner: ubuntu-22.04
+            target: aarch64
+          - runner: ubuntu-22.04
+            target: armv7
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --find-interpreter
+          manylinux: musllinux_1_2
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-musllinux-${{ matrix.platform.target }}
+          path: dist
+
+  windows:
+    needs: validate
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.9"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.10"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.11"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.12"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.13"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.14"
+          - runner: windows-2022
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.13"
+          - runner: windows-latest
+            target: x86
+            rust_target: i686-pc-windows-msvc
+            python_arch: x86
+            python: "3.13"
+          - runner: windows-11-arm
+            target: aarch64
+            rust_target: aarch64-pc-windows-msvc
+            python_arch: arm64
+            python: "3.13"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.python_arch }}
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --locked --out dist --interpreter python
+      - name: Test native module
+        run: |
+          $env:PYO3_PYTHON = python -c "import sys; print(sys.executable)"
+          cargo test --locked --target ${{ matrix.rust_target }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Validate wheel contents
+        if: needs.validate.outputs.modern_release == 'true'
+        run: python tools/validate_distribution.py dist
+      - name: Test installed Windows wheel
+        run: |
+          python -m pip install --force-reinstall --no-deps --no-index --find-links dist winevtx
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tests -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v6
+        if: matrix.runner != 'windows-2022'
+        with:
+          name: wheels-windows-${{ matrix.runner }}-${{ matrix.target }}-${{ matrix.python }}
+          path: dist
+
+  macos:
+    needs: validate
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      matrix:
+        platform:
+          - runner: macos-15-intel
+            target: x86_64
+          - runner: macos-latest
+            target: aarch64
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --find-interpreter
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-macos-${{ matrix.platform.target }}
+          path: dist
+
+  sdist:
+    needs: validate
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - uses: astral-sh/setup-uv@v7
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - name: Check distribution metadata
+        if: needs.validate.outputs.modern_release == 'true'
+        run: |
+          uv sync --locked --group release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          uv run --group release python -m twine check --strict dist/*
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/validate_distribution.py dist
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Check historical source distribution
+        if: needs.validate.outputs.modern_release != 'true'
+        run: python -m pip install --disable-pip-version-check twine; python -m twine check dist/*
+      - name: Rebuild and test source distribution
+        run: |
+          $source = @(Get-ChildItem dist/*.tar.gz)
+          if ($source.Count -ne 1) { throw "Expected one source distribution" }
+          python -m pip wheel --no-deps --wheel-dir rebuilt $source[0].FullName
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Test-Path tools/validate_distribution.py) {
+            python tools/validate_distribution.py rebuilt
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          python -m pip install --force-reinstall --no-deps --no-index --find-links rebuilt winevtx
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tests -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-sdist
+          path: dist
+
+  publish:
+    if: github.event_name == 'release' || inputs.publish
+    runs-on: ubuntu-latest
+    needs: [linux, musllinux, windows, macos, sdist]
+    environment:
+      name: pypi
+      url: https://pypi.org/p/winevtx
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Publish to PyPI
+        run: uv publish --trusted-publishing always --check-url https://pypi.org/simple/ "wheels-*/*"

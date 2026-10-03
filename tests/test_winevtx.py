@@ -1,7 +1,9 @@
 import os
+import sys
 import unittest
 import winevtx
 
+@unittest.skipUnless(sys.platform == "win32", "Live Windows Event Log queries require Windows")
 class TestWinevtxLive(unittest.TestCase):
     def test_query_events_record(self):
         events = winevtx.query_events(channel="System", limit=5)
@@ -90,6 +92,8 @@ class TestWinevtxLive(unittest.TestCase):
                 recs = f.read(limit=3)
                 self.assertEqual(len(recs), 3)
 
+
+class TestWinevtxCommon(unittest.TestCase):
     def test_xml_utilities(self):
         sample_xml = """<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
             <System>

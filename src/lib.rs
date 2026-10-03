@@ -1,13 +1,51 @@
 pub mod error;
+#[cfg(windows)]
 pub mod live;
 pub mod offline;
 pub mod record;
 pub mod xml_parse;
 
 use pyo3::prelude::*;
-use live::{LiveEventIterator, LiveEventLog};
 use offline::{EvtxFile, EvtxRecordIterator};
 use record::EventRecord;
+
+#[cfg(windows)]
+use live::{LiveEventIterator, LiveEventLog};
+
+#[cfg(not(windows))]
+#[pyclass]
+#[derive(Clone)]
+pub struct LiveEventLog;
+
+#[cfg(not(windows))]
+#[pymethods]
+impl LiveEventLog {
+    #[new]
+    #[pyo3(signature = (channel="System", query="*", reverse=true))]
+    fn new(channel: &str, query: &str, reverse: bool) -> PyResult<Self> {
+        let _ = (channel, query, reverse);
+        Err(pyo3::exceptions::PyRuntimeError::new_err(
+            "Live Windows Event Log queries are only supported on Windows",
+        ))
+    }
+}
+
+#[cfg(not(windows))]
+#[pyclass]
+pub struct LiveEventIterator;
+
+#[cfg(not(windows))]
+#[pymethods]
+impl LiveEventIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+    fn __next__(&mut self) -> PyResult<Option<PyObject>> {
+        Err(pyo3::exceptions::PyRuntimeError::new_err(
+            "Live Windows Event Log queries are only supported on Windows",
+        ))
+    }
+}
 
 /// Query live events from a Windows Event Log channel (e.g. "System", "Application", "Security").
 ///
@@ -30,8 +68,18 @@ fn query_events<'py>(
     reverse: bool,
     format: &str,
 ) -> PyResult<Vec<Bound<'py, PyAny>>> {
-    let log = LiveEventLog::new(channel, query, reverse);
-    log.read(py, limit, format)
+    #[cfg(windows)]
+    {
+        let log = LiveEventLog::new(channel, query, reverse);
+        log.read(py, limit, format)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (py, channel, query, limit, reverse, format);
+        Err(pyo3::exceptions::PyRuntimeError::new_err(
+            "Live Windows Event Log queries are only supported on Windows",
+        ))
+    }
 }
 
 /// Create an iterator over live Windows Event Log events.
@@ -52,8 +100,18 @@ fn iter_events(
     reverse: bool,
     format: &str,
 ) -> PyResult<LiveEventIterator> {
-    let log = LiveEventLog::new(channel, query, reverse);
-    log.iter(format)
+    #[cfg(windows)]
+    {
+        let log = LiveEventLog::new(channel, query, reverse);
+        log.iter(format)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (channel, query, reverse, format);
+        Err(pyo3::exceptions::PyRuntimeError::new_err(
+            "Live Windows Event Log queries are only supported on Windows",
+        ))
+    }
 }
 
 /// Read events from an offline .evtx file.
