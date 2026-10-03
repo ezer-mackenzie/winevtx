@@ -1,18 +1,20 @@
-from typing import Any, Dict, Iterator, List, Optional, Union
+from __future__ import annotations
+
+from typing import Any, Dict, Iterator, List, Union
 
 class EventRecord:
     """Represents a Windows Event record with parsed metadata and lazy dictionary conversion."""
 
     xml: str
-    event_id: Optional[int]
-    record_id: Optional[int]
-    channel: Optional[str]
-    provider: Optional[str]
-    level: Optional[int]
-    time_created: Optional[str]
-    computer: Optional[str]
-    system: Optional[Dict[str, Any]]
-    event_data: Optional[Union[Dict[str, Any], List[Any]]]
+    event_id: int | None
+    record_id: int | None
+    channel: str | None
+    provider: str | None
+    level: int | None
+    time_created: str | None
+    computer: str | None
+    system: Dict[str, Any] | None
+    event_data: Union[Dict[str, Any], List[Any]] | None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the entire event into a Python dictionary."""
@@ -45,24 +47,24 @@ class LiveEventLog:
         ...
 
     def read(
-        self, limit: Optional[int] = None, format: str = "record"
+        self, limit: int | None = None, format: str = "record"
     ) -> List[Union[EventRecord, Dict[str, Any], str]]:
         """Read a list of events from the live channel."""
         ...
 
     def iter(
         self, format: str = "record"
-    ) -> "LiveEventIterator":
+    ) -> LiveEventIterator:
         """Get an iterator over the events."""
         ...
 
-    def __iter__(self) -> "LiveEventIterator":
+    def __iter__(self) -> LiveEventIterator:
         ...
 
 class LiveEventIterator:
     """Iterator yielding events from a live Windows Event query."""
 
-    def __iter__(self) -> "LiveEventIterator":
+    def __iter__(self) -> LiveEventIterator:
         ...
 
     def __next__(self) -> Union[EventRecord, Dict[str, Any], str]:
@@ -75,21 +77,21 @@ class EvtxFile:
         ...
 
     def read(
-        self, limit: Optional[int] = None, format: str = "record"
+        self, limit: int | None = None, format: str = "record"
     ) -> List[Union[EventRecord, Dict[str, Any], str]]:
         """Read a list of records from the .evtx file."""
         ...
 
     def iter(
         self, format: str = "record"
-    ) -> "EvtxRecordIterator":
+    ) -> EvtxRecordIterator:
         """Get an iterator over the records in the .evtx file."""
         ...
 
-    def __iter__(self) -> "EvtxRecordIterator":
+    def __iter__(self) -> EvtxRecordIterator:
         ...
 
-    def __enter__(self) -> "EvtxFile":
+    def __enter__(self) -> EvtxFile:
         ...
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool:
@@ -98,7 +100,7 @@ class EvtxFile:
 class EvtxRecordIterator:
     """Iterator yielding records parsed from an offline .evtx file."""
 
-    def __iter__(self) -> "EvtxRecordIterator":
+    def __iter__(self) -> EvtxRecordIterator:
         ...
 
     def __next__(self) -> Union[EventRecord, Dict[str, Any], str]:
@@ -107,7 +109,7 @@ class EvtxRecordIterator:
 def query_events(
     channel: str = "System",
     query: str = "*",
-    limit: Optional[int] = None,
+    limit: int | None = None,
     reverse: bool = True,
     format: str = "record",
 ) -> List[Union[EventRecord, Dict[str, Any], str]]:
@@ -140,7 +142,7 @@ def iter_events(
 
 def read_evtx(
     path: str,
-    limit: Optional[int] = None,
+    limit: int | None = None,
     format: str = "record",
 ) -> List[Union[EventRecord, Dict[str, Any], str]]:
     """Read events from an offline .evtx file on disk.

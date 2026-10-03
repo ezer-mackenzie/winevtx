@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from winevtx._winevtx import (  # type: ignore[import-not-found]
     EventRecord,
@@ -23,7 +23,7 @@ __all__ = [
 def query_events(
     channel: str = "System",
     query: str = "*",
-    limit: Optional[int] = None,
+    limit: int | None = None,
     reverse: bool = True,
     format: str = "record",
 ) -> List[Union[EventRecord, Dict[str, Any], str]]:
