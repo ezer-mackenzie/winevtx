@@ -1,7 +1,7 @@
 # winevtx
 
 [![PyPI version](https://img.shields.io/pypi/v/winevtx.svg)](https://pypi.org/project/winevtx/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
 Librería de alto rendimiento para Python construida en **Rust** con **PyO3** y **Maturin**, diseñada para:
 1. **Consultar eventos del sistema operativo en vivo** utilizando la API nativa de Windows (`wevtapi.dll` / `EvtQuery` / `EvtRender`).

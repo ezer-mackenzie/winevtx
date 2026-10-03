@@ -2,7 +2,7 @@
 name = "winevtx"
 version = "0.1.0"
 edition = "2024"
-license = "MIT"
+license = "Apache-2.0"
 description = "High-performance Windows Event Log query and EVTX parser for Python built with Rust and PyO3"
 repository = "https://github.com/ezer-mackenzie/winevtx"
 readme = "README.md"

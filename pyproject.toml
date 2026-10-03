@@ -4,24 +4,45 @@ build-backend = "maturin"
 
 [project]
 name = "winevtx"
-dynamic = ["version"]
 description = "High-performance Windows Event Log query and EVTX parser for Python built with Rust and PyO3"
 readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "MIT" }
-keywords = ["windows", "eventlog", "evtx", "dfir", "security", "pyo3", "maturin", "rust"]
+license = "Apache-2.0"
+license-files = ["LICENSE.md"]
+authors = [{ name = "Eli-ezer Reuven Ramirez Ruiz" }]
+keywords = ["windows", "eventlog", "evtx", "dfir", "security", "forensics"]
+requires-python = ">=3.9,<3.15"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
     "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Security",
     "Topic :: System :: Logging",
+    "Typing :: Typed",
+]
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://winevtx.readthedocs.io/"
+Repository = "https://github.com/ezer-mackenzie/winevtx"
+Issues = "https://github.com/ezer-mackenzie/winevtx/issues"
+Changelog = "https://github.com/ezer-mackenzie/winevtx/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+release = ["twine>=6.1,<7.0"]
+docs = [
+    "mkdocs>=1.6,<2.0",
 ]
 
 [tool.maturin]
-python-source = "python"
 module-name = "winevtx._winevtx"
+python-source = "python"
 features = ["pyo3/extension-module"]
 include = [
     { path = "python/winevtx/py.typed", format = "wheel" },
