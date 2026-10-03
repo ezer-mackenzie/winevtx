@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Union
 
-from ._winevtx import (  # type: ignore[import-not-found]
+from ._winevtx import (
     EventRecord,
     LiveEventIterator,
     LiveEventLog,
