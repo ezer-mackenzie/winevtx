@@ -23,3 +23,7 @@ classifiers = [
 python-source = "python"
 module-name = "winevtx._winevtx"
 features = ["pyo3/extension-module"]
+include = [
+    { path = "python/winevtx/py.typed", format = "wheel" },
+    { path = "tests/*.py", format = "sdist" },
+]

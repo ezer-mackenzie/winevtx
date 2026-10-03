@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from winevtx._winevtx import (  # type: ignore[import-not-found]
+from ._winevtx import (  # type: ignore[import-not-found]
     xml_to_dict as _xml_to_dict,
     xml_to_json as _xml_to_json,
 )
