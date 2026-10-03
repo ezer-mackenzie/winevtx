@@ -20,7 +20,7 @@ Librería de alto rendimiento para Python construida en **Rust** con **PyO3** y 
   - `dict`: Diccionario nativo de Python deserializado directamente en CPython.
   - `xml`: Cadena XML nativa de Windows.
   - `json`: Cadena JSON formateada.
-- 📦 **Type hints completos**: Incluye archivo de tipos `winevtx.pyi` para autocompletado instantáneo en VS Code, PyCharm, etc.
+- 📦 **Type hints completos**: Soporte estático PEP 561 (`py.typed`) y stubs tipados para autocompletado instantáneo en VS Code, PyCharm, etc.
 
 ---
 
