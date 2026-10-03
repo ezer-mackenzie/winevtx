@@ -48,7 +48,7 @@ class LiveEventLog:
 
     def read(
         self, limit: int | None = None, format: str = "record"
-    ) -> List[Union[EventRecord, Dict[str, Any], str]]:
+    ) -> List[Any]:
         """Read a list of events from the live channel."""
         ...
 
@@ -67,7 +67,7 @@ class LiveEventIterator:
     def __iter__(self) -> LiveEventIterator:
         ...
 
-    def __next__(self) -> Union[EventRecord, Dict[str, Any], str]:
+    def __next__(self) -> Any:
         ...
 
 class EvtxFile:
@@ -78,7 +78,7 @@ class EvtxFile:
 
     def read(
         self, limit: int | None = None, format: str = "record"
-    ) -> List[Union[EventRecord, Dict[str, Any], str]]:
+    ) -> List[Any]:
         """Read a list of records from the .evtx file."""
         ...
 
@@ -103,7 +103,7 @@ class EvtxRecordIterator:
     def __iter__(self) -> EvtxRecordIterator:
         ...
 
-    def __next__(self) -> Union[EventRecord, Dict[str, Any], str]:
+    def __next__(self) -> Any:
         ...
 
 def query_events(
@@ -112,7 +112,7 @@ def query_events(
     limit: int | None = None,
     reverse: bool = True,
     format: str = "record",
-) -> List[Union[EventRecord, Dict[str, Any], str]]:
+) -> List[Any]:
     """Query live events from a Windows Event Log channel (e.g. 'System', 'Application', 'Security').
 
     Args:
@@ -144,7 +144,7 @@ def read_evtx(
     path: str,
     limit: int | None = None,
     format: str = "record",
-) -> List[Union[EventRecord, Dict[str, Any], str]]:
+) -> List[Any]:
     """Read events from an offline .evtx file on disk.
 
     Args:

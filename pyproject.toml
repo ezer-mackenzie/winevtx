@@ -27,3 +27,12 @@ include = [
     { path = "python/winevtx/py.typed", format = "wheel" },
     { path = "tests/*.py", format = "sdist" },
 ]
+
+[tool.pyright]
+include = ["python", "tests"]
+extraPaths = ["python"]
+executionEnvironments = [
+    { root = "python" },
+]
+venvPath = "."
+venv = ".venv"
