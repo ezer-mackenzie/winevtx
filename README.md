@@ -1,7 +1,7 @@
 # winevtx
 
 [![PyPI version](https://img.shields.io/pypi/v/winevtx.svg)](https://pypi.org/project/winevtx/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
 High-performance Python library built with **Rust**, **PyO3**, and **Maturin**,
 designed to:
