@@ -1,0 +1,25 @@
+[build-system]
+requires = ["maturin>=1.15,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "winevtx"
+dynamic = ["version"]
+description = "High-performance Windows Event Log query and EVTX parser for Python built with Rust and PyO3"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["windows", "eventlog", "evtx", "dfir", "security", "pyo3", "maturin", "rust"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Security",
+    "Topic :: System :: Logging",
+]
+
+[tool.maturin]
+python-source = "python"
+module-name = "winevtx._winevtx"
+features = ["pyo3/extension-module"]
