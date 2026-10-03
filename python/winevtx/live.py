@@ -12,13 +12,6 @@ from winevtx._winevtx import (  # type: ignore[import-not-found]
     query_events as _query_events,
 )
 
-__all__ = [
-    "LiveEventLog",
-    "LiveEventIterator",
-    "query_events",
-    "iter_events",
-]
-
 
 def query_events(
     channel: str = "System",

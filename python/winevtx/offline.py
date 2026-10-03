@@ -12,13 +12,6 @@ from winevtx._winevtx import (  # type: ignore[import-not-found]
     read_evtx as _read_evtx,
 )
 
-__all__ = [
-    "EvtxFile",
-    "EvtxRecordIterator",
-    "read_evtx",
-    "iter_evtx",
-]
-
 
 def read_evtx(
     path: str,
