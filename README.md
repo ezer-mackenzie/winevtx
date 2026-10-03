@@ -31,8 +31,9 @@ designed to:
   - `dict`: Native Python dictionary deserialized directly in CPython.
   - `xml`: Raw Windows XML string.
   - `json`: Formatted JSON string.
-- **Type hints**: Type stubs for editor completion in VS Code, PyCharm, and
-  other Python IDEs.
+- **Type hints**: PEP 561 static typing support through `py.typed` and type
+  stubs for editor completion in VS Code, PyCharm, and other Python IDEs.
+
 
 ---
 

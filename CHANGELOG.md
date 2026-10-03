@@ -14,5 +14,6 @@ All notable changes to this project will be documented in this file.
   - `EventRecord` wrapper class supporting direct metadata attributes (`event_id`, `provider`, `channel`, etc.), `to_dict()`, `to_json()`, and indexing.
   - `xml_to_dict` and `xml_to_json` conversion utilities.
 - Output formats: `record`, `dict`, `xml`, `json`.
-- Python typing stubs (`winevtx.pyi`).
+- Modular Python package architecture (`winevtx.live`, `winevtx.offline`, `winevtx.utils`) with PEP 604 union types (`| None`).
+- Python typing stubs (`_winevtx.pyi`) and PEP 561 marker (`py.typed`).
 - Comprehensive unit test suite in `tests/test_winevtx.py`.
