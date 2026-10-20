@@ -14,7 +14,7 @@ requires-python = ">=3.9,<3.15"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -33,6 +33,7 @@ Documentation = "https://winevtx.readthedocs.io/"
 Repository = "https://github.com/ezer-mackenzie/winevtx"
 Issues = "https://github.com/ezer-mackenzie/winevtx/issues"
 Changelog = "https://github.com/ezer-mackenzie/winevtx/blob/main/CHANGELOG.md"
+Security = "https://github.com/ezer-mackenzie/winevtx/security/policy"
 
 [dependency-groups]
 release = ["twine>=6.1,<7.0"]

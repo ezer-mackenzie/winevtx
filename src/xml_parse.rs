@@ -34,7 +34,10 @@ fn node_to_value(node: &Node) -> Value {
     // Attributes
     for attr in node.attributes() {
         // e.g. Name="foo" -> "Name": "foo"
-        map.insert(attr.name().to_string(), Value::String(attr.value().to_string()));
+        map.insert(
+            attr.name().to_string(),
+            Value::String(attr.value().to_string()),
+        );
     }
 
     // Direct text in an element that has attributes
@@ -121,10 +124,8 @@ fn parse_primitive(s: &str) -> Value {
     if let Ok(u) = s.parse::<u64>() {
         return Value::Number(u.into());
     }
-    if let Ok(f) = s.parse::<f64>() {
-        if let Some(n) = serde_json::Number::from_f64(f) {
-            return Value::Number(n);
-        }
+    if let Some(number) = s.parse::<f64>().ok().and_then(serde_json::Number::from_f64) {
+        return Value::Number(number);
     }
     if s == "true" {
         return Value::Bool(true);

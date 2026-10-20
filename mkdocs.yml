@@ -1,0 +1,17 @@
+site_name: winevtx
+site_description: Windows Event Log queries and EVTX file parsing for Python.
+site_url: https://winevtx.readthedocs.io/
+repo_url: https://github.com/ezer-mackenzie/winevtx
+repo_name: ezer-mackenzie/winevtx
+
+theme:
+  name: readthedocs
+
+nav:
+  - Inicio: index.md
+  - Getting started: getting-started.md
+  - API reference: api.md
+  - Contributing: contributing.md
+  - Security: security.md
+
+strict: true

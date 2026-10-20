@@ -1,8 +1,8 @@
-use pyo3::prelude::*;
-use std::path::PathBuf;
 use crate::error::WinevtxError;
 use crate::live::format_xml;
 use evtx::EvtxParser;
+use pyo3::prelude::*;
+use std::path::PathBuf;
 
 #[pyclass(name = "EvtxFile")]
 pub struct EvtxFile {
@@ -45,9 +45,8 @@ impl EvtxFile {
     #[pyo3(signature = (format="record"))]
     pub fn iter(&self, format: &str) -> PyResult<EvtxRecordIterator> {
         // Test that file can be opened
-        let _ = EvtxParser::from_path(&self.path).map_err(|e| {
-            WinevtxError::EvtxParse(format!("Failed to open EVTX file: {}", e))
-        })?;
+        let _ = EvtxParser::from_path(&self.path)
+            .map_err(|e| WinevtxError::EvtxParse(format!("Failed to open EVTX file: {}", e)))?;
 
         let (tx, rx) = std::sync::mpsc::sync_channel::<std::result::Result<String, String>>(128);
         let path_clone = self.path.clone();
@@ -107,7 +106,9 @@ impl EvtxFile {
 
 #[pyclass(name = "EvtxRecordIterator")]
 pub struct EvtxRecordIterator {
-    receiver: std::sync::Arc<std::sync::Mutex<std::sync::mpsc::Receiver<std::result::Result<String, String>>>>,
+    receiver: std::sync::Arc<
+        std::sync::Mutex<std::sync::mpsc::Receiver<std::result::Result<String, String>>>,
+    >,
     format: String,
 }
 

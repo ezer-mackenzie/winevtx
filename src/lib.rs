@@ -5,8 +5,8 @@ pub mod offline;
 pub mod record;
 pub mod xml_parse;
 
-use pyo3::prelude::*;
 use offline::{EvtxFile, EvtxRecordIterator};
+use pyo3::prelude::*;
 use record::EventRecord;
 
 #[cfg(windows)]

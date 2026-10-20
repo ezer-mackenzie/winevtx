@@ -46,8 +46,10 @@ impl EventRecord {
                 } else if let Some(s) = id_val.as_str() {
                     s.parse().ok()
                 } else if let Some(obj) = id_val.as_object() {
-                    obj.get("#text")
-                        .and_then(|t| t.as_u64().or_else(|| t.as_str().and_then(|s| s.parse().ok())))
+                    obj.get("#text").and_then(|t| {
+                        t.as_u64()
+                            .or_else(|| t.as_str().and_then(|s| s.parse().ok()))
+                    })
                 } else {
                     None
                 };

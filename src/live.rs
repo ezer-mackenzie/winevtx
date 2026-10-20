@@ -1,6 +1,6 @@
-use pyo3::prelude::*;
-use crate::error::{WinevtxError, Result};
+use crate::error::{Result, WinevtxError};
 use crate::record::EventRecord;
+use pyo3::prelude::*;
 
 #[cfg(windows)]
 mod imp {
@@ -80,11 +80,7 @@ mod imp {
         }
     }
 
-    pub fn query_channel(
-        channel: &str,
-        query: &str,
-        reverse: bool,
-    ) -> Result<EvtHandle> {
+    pub fn query_channel(channel: &str, query: &str, reverse: bool) -> Result<EvtHandle> {
         let channel_w: Vec<u16> = channel.encode_utf16().chain(std::iter::once(0)).collect();
         let query_w: Vec<u16> = query.encode_utf16().chain(std::iter::once(0)).collect();
 
@@ -100,7 +96,10 @@ mod imp {
             if handle == 0 {
                 let err = GetLastError();
                 return Err(WinevtxError::WindowsApi(
-                    format!("Failed to query channel '{}' with query '{}'", channel, query),
+                    format!(
+                        "Failed to query channel '{}' with query '{}'",
+                        channel, query
+                    ),
                     err,
                 ));
             }
@@ -108,7 +107,11 @@ mod imp {
         }
     }
 
-    pub fn fetch_next_events(query_handle: EVT_HANDLE, count: u32, timeout_ms: u32) -> Result<Vec<EvtHandle>> {
+    pub fn fetch_next_events(
+        query_handle: EVT_HANDLE,
+        count: u32,
+        timeout_ms: u32,
+    ) -> Result<Vec<EvtHandle>> {
         let mut raw_handles = vec![0 as EVT_HANDLE; count as usize];
         let mut returned = 0;
 
@@ -127,15 +130,12 @@ mod imp {
                 if err == ERROR_NO_MORE_ITEMS {
                     return Ok(Vec::new());
                 }
-                return Err(WinevtxError::WindowsApi(
-                    "EvtNext failed".to_string(),
-                    err,
-                ));
+                return Err(WinevtxError::WindowsApi("EvtNext failed".to_string(), err));
             }
 
             let mut out = Vec::with_capacity(returned as usize);
-            for i in 0..returned as usize {
-                out.push(EvtHandle(raw_handles[i]));
+            for handle in raw_handles.iter().take(returned as usize) {
+                out.push(EvtHandle(*handle));
             }
             Ok(out)
         }
