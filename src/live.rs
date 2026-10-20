@@ -1,4 +1,6 @@
-use crate::error::{Result, WinevtxError};
+#[cfg(windows)]
+use crate::error::Result;
+use crate::error::WinevtxError;
 use crate::record::EventRecord;
 use pyo3::prelude::*;
 
@@ -219,7 +221,9 @@ impl LiveEventLog {
 pub struct LiveEventIterator {
     #[cfg(windows)]
     handle: Option<imp::EvtHandle>,
+    #[cfg(windows)]
     format: String,
+    #[cfg(windows)]
     buffer: std::collections::VecDeque<String>,
 }
 
