@@ -6,7 +6,7 @@ first to agree on scope and avoid duplicated work.
 ## Requirements
 
 - Python 3.9–3.14.
-- Stable Rust and Maturin to build the native extension.
+- Rust 1.88 or later and Maturin to build the native extension.
 - Windows to develop or test live Event Log queries.
 
 Install the locked dependencies from the repository root:

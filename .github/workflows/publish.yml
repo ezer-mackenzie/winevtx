@@ -87,13 +87,9 @@ jobs:
           - runner: ubuntu-22.04
             target: x86_64
           - runner: ubuntu-22.04
-            target: x86
-          - runner: ubuntu-22.04
             target: aarch64
           - runner: ubuntu-22.04
             target: armv7
-          - runner: ubuntu-22.04
-            target: s390x
           - runner: ubuntu-22.04
             target: ppc64le
     steps:
@@ -105,6 +101,7 @@ jobs:
           python-version: "3.14"
       - uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           manylinux: auto
@@ -122,8 +119,6 @@ jobs:
           - runner: ubuntu-22.04
             target: x86_64
           - runner: ubuntu-22.04
-            target: x86
-          - runner: ubuntu-22.04
             target: aarch64
           - runner: ubuntu-22.04
             target: armv7
@@ -136,6 +131,7 @@ jobs:
           python-version: "3.14"
       - uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           manylinux: musllinux_1_2
@@ -185,11 +181,6 @@ jobs:
             rust_target: x86_64-pc-windows-msvc
             python_arch: x64
             python: "3.13"
-          - runner: windows-latest
-            target: x86
-            rust_target: i686-pc-windows-msvc
-            python_arch: x86
-            python: "3.13"
           - runner: windows-11-arm
             target: aarch64
             rust_target: aarch64-pc-windows-msvc
@@ -205,6 +196,7 @@ jobs:
           architecture: ${{ matrix.python_arch }}
       - uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.target }}
           args: --release --locked --out dist --interpreter python
       - name: Test native module
@@ -246,6 +238,7 @@ jobs:
           python-version: "3.14"
       - uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
       - uses: actions/upload-artifact@v6
@@ -266,6 +259,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
       - uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           command: sdist
           args: --out dist
       - name: Check distribution metadata

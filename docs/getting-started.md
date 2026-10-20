@@ -8,6 +8,9 @@ Install the published package from PyPI:
 python -m pip install winevtx
 ```
 
+Prebuilt wheels are provided for supported little-endian targets. The current
+upstream EVTX parser dependencies do not support `s390x` or 32-bit x86.
+
 ## Query live events
 
 Live Windows Event Log queries require Windows. The current user must have

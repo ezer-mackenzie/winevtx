@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Set the minimum supported Rust version to 1.88 to match the `evtx` parser dependency.
+- Stop building wheels for `s390x` and 32-bit x86, which are unsupported by the current upstream EVTX parser dependencies.
+
 ### Planned
 - Maintenance releases with bug fixes and compatible improvements.
 

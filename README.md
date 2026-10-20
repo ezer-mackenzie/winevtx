@@ -39,6 +39,8 @@ and **Maturin**. It is designed to:
 - Python 3.9 through 3.14.
 - Windows is required for live Event Log queries. Offline `.evtx` parsing does
   not require a connection to the Windows Event Log service.
+- Prebuilt wheels are provided for supported little-endian targets. The current
+  upstream EVTX parser dependencies do not support `s390x` or 32-bit x86.
 
 Install the published package from PyPI:
 

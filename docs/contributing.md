@@ -5,7 +5,7 @@ significant changes, open a discussion or issue first to agree on the scope.
 
 ## Set up the development environment
 
-Python 3.13 and stable Rust are recommended. From the repository root:
+Python 3.13 and Rust 1.88 or later are required. From the repository root:
 
 ```powershell
 uv sync --locked

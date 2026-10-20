@@ -39,10 +39,10 @@ jobs:
           python-version: "3.13"
       - name: Check minimum Rust version
         run: |
-          rustup toolchain install 1.85.0 --profile minimal
+          rustup toolchain install 1.88.0 --profile minimal
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $env:PYO3_PYTHON = python -c "import sys; print(sys.executable)"
-          cargo +1.85.0 check --locked
+          cargo +1.88.0 check --locked
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   docs:
@@ -61,13 +61,9 @@ jobs:
           - runner: ubuntu-22.04
             target: x86_64
           - runner: ubuntu-22.04
-            target: x86
-          - runner: ubuntu-22.04
             target: aarch64
           - runner: ubuntu-22.04
             target: armv7
-          - runner: ubuntu-22.04
-            target: s390x
           - runner: ubuntu-22.04
             target: ppc64le
     steps:
@@ -78,6 +74,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -96,8 +93,6 @@ jobs:
           - runner: ubuntu-22.04
             target: x86_64
           - runner: ubuntu-22.04
-            target: x86
-          - runner: ubuntu-22.04
             target: aarch64
           - runner: ubuntu-22.04
             target: armv7
@@ -109,6 +104,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -159,11 +155,6 @@ jobs:
             rust_target: x86_64-pc-windows-msvc
             python_arch: x64
             python: "3.13"
-          - runner: windows-latest
-            target: x86
-            rust_target: i686-pc-windows-msvc
-            python_arch: x86
-            python: "3.13"
           - runner: windows-11-arm
             target: aarch64
             rust_target: aarch64-pc-windows-msvc
@@ -178,6 +169,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.target }}
           args: --release --locked --out dist --interpreter python
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -218,6 +210,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -237,6 +230,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
       - uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: 1.88.0
           command: sdist
           args: --out dist
       - name: Check distribution metadata
