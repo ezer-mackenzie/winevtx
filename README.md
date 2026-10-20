@@ -1,194 +1,156 @@
 # winevtx
 
 [![PyPI version](https://img.shields.io/pypi/v/winevtx.svg)](https://pypi.org/project/winevtx/)
+[![CI](https://github.com/ezer-mackenzie/winevtx/actions/workflows/ci.yml/badge.svg)](https://github.com/ezer-mackenzie/winevtx/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE.md)
 
-High-performance Python library built with **Rust**, **PyO3**, and **Maturin**,
-designed to:
+Read the full documentation at [winevtx.readthedocs.io](https://winevtx.readthedocs.io/).
 
-1. **Query live operating system events** through the native Windows API
+`winevtx` is a high-performance Python library built with **Rust**, **PyO3**,
+and **Maturin**. It is designed to:
+
+1. Query live Windows Event Log channels through the native Windows API
    (`wevtapi.dll` / `EvtQuery` / `EvtRender`).
-2. **Parse and analyze `.evtx` files offline** with multi-threaded processing
-   powered by Rayon.
-3. Return structured data as `EventRecord` objects, native Python dictionaries
-   (`dict`), raw XML strings, or JSON.
-
----
+2. Parse `.evtx` files offline with multi-threaded processing powered by Rayon.
+3. Return structured data as `EventRecord` objects, native Python dictionaries,
+   raw XML strings, or JSON.
 
 ## Features
 
-- **Native performance**: Rust engine with minimal overhead that releases the
-  GIL during intensive I/O and decoding.
-- **Live OS events**: Access channels such as `System`, `Security`,
-  `Application`, or any registered channel, with custom XPath filters (for
-  example, `*[System[(Level <= 3)]]`).
-- **Offline `.evtx` files**: Forensic reading of exported Windows records
-  without relying on external utilities.
-- **Multiple formats**:
-  - `record` (default): `EventRecord` object with direct properties
+- **Native performance**: Rust engine that releases the GIL during intensive
+  I/O and decoding.
+- **Live Windows events**: Query channels such as `System`, `Security`, and
+  `Application`, with custom XPath filters (for example,
+  `*[System[(Level <= 3)]]`).
+- **Offline `.evtx` files**: Read exported event logs without connecting to
+  Windows Event Log.
+- **Multiple output formats**:
+  - `record` (default): `EventRecord` objects with metadata properties
     (`event_id`, `provider`, `channel`, `time_created`, `event_data`, `system`),
-    a `.to_dict()` method, and indexing support such as `event["System"]`.
-  - `dict`: Native Python dictionary deserialized directly in CPython.
-  - `xml`: Raw Windows XML string.
-  - `json`: Formatted JSON string.
-- **Type hints**: PEP 561 static typing support through `py.typed` and type
-  stubs for editor completion in VS Code, PyCharm, and other Python IDEs.
+    `.to_dict()`, and dict-style indexing such as `event["System"]`.
+  - `dict`: Native Python dictionaries.
+  - `xml`: Raw Windows Event XML strings.
+  - `json`: JSON strings.
+- **Type hints**: PEP 561 support through `py.typed` and stubs for the compiled
+  extension.
 
+## Requirements and installation
 
----
+- Python 3.9 through 3.14.
+- Windows is required for live Event Log queries. Offline `.evtx` parsing does
+  not require a connection to the Windows Event Log service.
 
-## Local installation and build
+Install the published package from PyPI:
 
-To build and test locally with Maturin:
-
-```powershell
-# Create a virtual environment and install Maturin
-python -m venv .venv
-.\.venv\Scripts\pip install maturin
-
-# Build and install in editable mode
-.\.venv\Scripts\maturin develop
+```bash
+python -m pip install winevtx
 ```
 
-To build a wheel (`.whl`):
+## Build from source
+
+To build and install the package locally with Maturin:
 
 ```powershell
-maturin build --release
+uv sync --locked
+uv run maturin develop
 ```
 
----
+To build a wheel:
+
+```powershell
+uv run maturin build --release
+```
 
 ## Usage
 
-### 1. Read live OS events
-
-#### Quick query for recent events
+### Query live Windows events
 
 ```python
 import winevtx
 
-# Get the 10 most recent events from the System channel
 events = winevtx.query_events(channel="System", limit=10)
-
 for event in events:
     print(f"[{event.time_created}] EventID: {event.event_id} | Provider: {event.provider}")
     print(event.to_dict())
 ```
 
-#### Filter with XPath queries
+Filter the results with an XPath query:
 
 ```python
-import winevtx
-
-# Filter error and warning events (Level <= 3)
-query = "*[System[(Level <= 3)]]"
-events = winevtx.query_events(channel="System", query=query, limit=5)
-
-for event in events:
-    print(f"Alert level {event.level}: {event.provider} (ID: {event.event_id})")
+events = winevtx.query_events(
+    channel="System",
+    query="*[System[(Level <= 3)]]",
+    limit=5,
+)
 ```
 
-#### Streaming iterator
+Use `iter_events` to process results incrementally:
 
 ```python
-import winevtx
-
-# Stream events without loading them all into memory
 for event in winevtx.iter_events(channel="Application", reverse=True):
     if event.event_id == 1000:
-        print("Application error detected:", event.event_data)
+        print("Application error:", event.event_data)
         break
 ```
 
----
-
-### 2. Read `.evtx` files offline
+### Read `.evtx` files offline
 
 ```python
 import winevtx
 
-# Read an .evtx file directly
 events = winevtx.read_evtx(r"C:\Logs\Security.evtx", limit=50)
 
-# Or use a context manager
 with winevtx.EvtxFile(r"C:\Logs\System.evtx") as log:
-    for event in log.iter(format="record"):
+    for event in log.iter():
         print(event.event_id, event.computer, event.time_created)
 ```
 
----
+### Choose an output format
 
-### 3. Output formats (`record`, `dict`, `xml`, `json`)
+The `format` argument accepts `"record"` (the default), `"dict"`, `"xml"`, or
+`"json"`:
 
 ```python
-import winevtx
-
-# 1. EventRecord object (default)
 event = winevtx.query_events("System", limit=1, format="record")[0]
 print(event.event_id)
-print(event.xml)           # Raw XML
-print(event.to_dict())     # Python dictionary
-print(event.to_json())     # JSON string
+print(event.xml)
+print(event.to_dict())
+print(event.to_json())
 
-# 2. Plain Python dictionary
 data = winevtx.query_events("System", limit=1, format="dict")[0]
 print(data["Event"]["System"]["Channel"])
-
-# 3. Raw native XML
-raw_xml = winevtx.query_events("System", limit=1, format="xml")[0]
-print(raw_xml)
-
-# 4. JSON
-json_string = winevtx.query_events("System", limit=1, format="json")[0]
-print(json_string)
 ```
 
----
-
-### 4. Helper utilities
+### XML utilities
 
 ```python
 import winevtx
 
 xml_string = "<Event>...</Event>"
-
-# Convert Windows event XML to a dictionary
 event_data = winevtx.xml_to_dict(xml_string)
-
-# Convert XML to JSON
 json_string = winevtx.xml_to_json(xml_string)
 ```
 
----
+## API overview
 
-## API reference
+- `query_events(channel="System", query="*", limit=None, reverse=True, format="record")`
+  queries a live Windows Event Log channel.
+- `iter_events(channel="System", query="*", reverse=True, format="record")`
+  iterates over live events.
+- `read_evtx(path, limit=None, format="record")` reads records from an `.evtx`
+  file.
+- `iter_evtx(path, format="record")` iterates over records in an `.evtx` file.
+- `xml_to_dict(xml)` parses Windows Event XML into a Python dictionary.
+- `xml_to_json(xml)` converts Windows Event XML to JSON.
 
-### Main functions
+The package also exposes `EventRecord`, `LiveEventLog`, and `EvtxFile`. See the
+[API reference](docs/api.md) for details.
 
-- `query_events(channel="System", query="*", limit=None, reverse=True, format="record") -> List`:
-  Query events from a live Windows channel.
-- `iter_events(channel="System", query="*", reverse=True, format="record") -> LiveEventIterator`:
-  Iterate over live events.
-- `read_evtx(path, limit=None, format="record") -> List`:
-  Read events from an `.evtx` file on disk.
-- `iter_evtx(path, format="record") -> EvtxRecordIterator`:
-  Iterate over an `.evtx` file.
-- `xml_to_dict(xml: str) -> dict`:
-  Parse event XML into a Python dictionary.
-- `xml_to_json(xml: str) -> str`:
-  Parse event XML into a JSON string.
+## Project links
 
-### Classes
-
-- `winevtx.EventRecord`: Event container.
-  - Attributes: `xml`, `event_id`, `record_id`, `channel`, `provider`, `level`,
-    `time_created`, `computer`, `system`, `event_data`.
-  - Methods: `to_dict()`, `to_json()`, `get(key, default)`.
-- `winevtx.LiveEventLog(channel, query, reverse)`: Live channel handler.
-- `winevtx.EvtxFile(path)`: Offline `.evtx` file handler (supports `with`).
-
----
-
-## License
-
-This project is licensed under the MIT License.
+- [Documentation](https://winevtx.readthedocs.io/)
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
+- [Code of conduct](CODE_OF_CONDUCT.md)
+- [Security policy](SECURITY.md)
+- [License](LICENSE.md)
